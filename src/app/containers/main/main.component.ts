@@ -9,6 +9,8 @@ import {
   timer,
   defaultIfEmpty,
   startWith,
+  map,
+  tap,
 } from 'rxjs';
 import { Currency, CurrencyInputValue } from 'src/app/models/currency';
 import { ExchangeApiService } from 'src/app/services/exchange-api.service';
@@ -21,7 +23,7 @@ import { ExchangeApiService } from 'src/app/services/exchange-api.service';
 export class MainComponent implements OnInit {
   currencyFrom!: any;
   currencyTo!: any;
-  amountFrom!: number;
+  amountFrom = 0;
 
   currencyAggregateFrom: Subject<CurrencyInputValue> =
     new Subject<CurrencyInputValue>();
@@ -32,22 +34,20 @@ export class MainComponent implements OnInit {
   currencies$: Observable<Currency[]> = new Observable<Currency[]>();
 
   constructor(private exchangeApi: ExchangeApiService) {
-    this.exchangeApi.getCurrencies().subscribe((currencies: Currency[]) => {
-      const keys = Object.keys(currencies);
-      const values = Object.values(currencies);
+    this.currencies$ = this.exchangeApi.getCurrencies().pipe(
+      tap((currencies: Currency[]) => {
+        const keys = Object.keys(currencies);
+        const values = Object.values(currencies);
 
-      const firstKey = keys[0];
-      const firstValue = values[0];
-      const secondKey = keys[1];
-      const secondValue = values[1];
+        const firstKey = keys[0];
+        const firstValue = values[0];
+        const secondKey = keys[1];
+        const secondValue = values[1];
 
-      this.currencyFrom = { key: firstKey, value: firstValue };
-      this.currencyTo = { key: secondKey, value: secondValue };
-
-      this.amountFrom = 0;
-    });
-
-    this.currencies$ = this.exchangeApi.getCurrencies();
+        this.currencyFrom = { key: firstKey, value: firstValue };
+        this.currencyTo = { key: secondKey, value: secondValue };
+      })
+    );
 
     this.amountTo$ = combineLatest([
       this.currencyAggregateFrom,
