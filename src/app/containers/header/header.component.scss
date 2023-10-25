@@ -1,0 +1,40 @@
+.header {
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  margin-top: 20px;
+  padding: 0 20px;
+  margin-bottom: 100px;
+  -webkit-box-pack: justify;
+  justify-content: space-between;
+  height: 100px;
+  width: 100%;
+
+  .headerTitle {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+
+    color: white;
+    letter-spacing: 1px;
+  }
+
+  .headerCurrencies {
+    display: flex;
+    flex-direction: row; /* Определяем, что дети должны располагаться вертикально */
+    justify-content: space-between; /* Распределение максимального пространства между детьми */
+    justify-content: flex-end;
+    align-items: flex-start; /* Выравнивание по левому краю (или по вашему выбору) */
+    height: 100%; /* Устанавливаем высоту контейнера по высоте видимой области */
+
+    .currencyBlock {
+      // border: 1px solid rgb(223, 216, 216);
+      // border-radius: 5px;
+      display: flex;
+      width: 200px;
+      height: 100px;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}

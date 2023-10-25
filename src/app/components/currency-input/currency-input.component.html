@@ -1,0 +1,9 @@
+<div class="currencyInput">
+  <app-dropdown
+    [options]="currencies"
+    [selected]="selectedCurrency"
+    (dropdownSelect)="onCurrencySelect($event)"></app-dropdown>
+  <app-input
+    [value]="amount"
+    (valueChange)="onAmountChange($event)"></app-input>
+</div>

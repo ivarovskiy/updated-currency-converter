@@ -1,1 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
+@import '/node_modules/primeflex/primeflex.css';
+@import '/node_modules/currency-flags/dist/currency-flags.css';
+
+:root {
+    .p-button {
+        padding: 1.5rem 1rem;
+    }
+}
