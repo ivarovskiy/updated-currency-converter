@@ -1,24 +1,18 @@
-<!-- <div class="main">
-  <app-currency-input></app-currency-input>
-  <app-button (buttonClicked)="onButtonSwapClick()"></app-button>
-  <app-currency-input></app-currency-input>
-</div> -->
-
 <div class="main">
   <ng-container *ngIf="currencies$ | async as currencies; else loadingData">
     <app-currency-input
       [currencies]="currencies"
       [amount]="amountFrom"
-      [selectedCurrency]="currencyFrom"></app-currency-input>
+      [selectedCurrency]="currencyFrom"
+      (handleChange)="onCurrencyInputChangeFrom($event)"></app-currency-input>
   </ng-container>
   <app-button (buttonClicked)="onButtonSwapClick()"></app-button>
   <ng-container *ngIf="currencies$ | async as currencies; else loadingData">
-    <ng-container *ngIf="amountTo$ | async as amount; else loadingData">
-      <app-currency-input
-        [currencies]="currencies"
-        [amount]="amount"
-        [selectedCurrency]="currencyTo"></app-currency-input>
-    </ng-container>
+    <app-currency-input
+      [currencies]="currencies"
+      [amount]="amountTo$ | async"
+      [selectedCurrency]="currencyTo"
+      (handleChange)="onCurrencyInputChangeTo($event)"></app-currency-input>
   </ng-container>
 </div>
 

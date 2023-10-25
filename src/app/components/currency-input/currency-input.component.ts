@@ -14,10 +14,11 @@ import { Currency, CurrencyInputValue } from 'src/app/models/currency';
   styleUrls: ['./currency-input.component.scss'],
 })
 export class CurrencyInputComponent implements OnDestroy {
-  @Input() amount!: number;
+  @Input() amount!: number | null;
   @Input() currencies!: Currency[];
   @Input() selectedCurrency!: Currency;
-  @Output() handleChange!: EventEmitter<CurrencyInputValue>;
+  @Output() handleChange: EventEmitter<CurrencyInputValue> =
+    new EventEmitter<CurrencyInputValue>();
 
   amountStream: Subject<number> = new Subject<number>();
   currencyStream: Subject<Currency> = new Subject<Currency>();

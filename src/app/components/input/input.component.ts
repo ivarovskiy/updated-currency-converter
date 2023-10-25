@@ -6,7 +6,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   styleUrls: ['./input.component.scss'],
 })
 export class InputComponent {
-  @Input() value!: number;
+  @Input() value!: number | null;
   @Output() valueChange: EventEmitter<number> = new EventEmitter<number>();
 
   onInputChange(event: Event): void {
@@ -17,7 +17,6 @@ export class InputComponent {
       this.value = parsedValue;
       this.valueChange.emit(this.value);
     } else {
-      // Якщо введене значення не є числом, можна вжити певні дії, наприклад, вивести помилку.
       console.error('Введено некоректне число');
     }
   }
