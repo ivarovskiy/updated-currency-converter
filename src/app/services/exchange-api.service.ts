@@ -13,7 +13,7 @@ export class ExchangeApiService {
   constructor(private http: HttpClient) {}
 
   getCurrenciesRates(): Observable<any> {
-    return iif(isDevMode, of(latest), this.http.get('/latest.jso'));
+    return iif(isDevMode, of(latest), this.http.get('/latest.json'));
   }
 
   getCurrencies(): Observable<Currency[]> {

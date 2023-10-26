@@ -14,8 +14,8 @@ export class AuthInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
     const modifiedRequest = request.clone({
-      url: 'https://openexchangerates.org/api',
-      setHeaders: {
+      url: 'https://openexchangerates.org/api' + request.url,
+      setParams: {
         app_id: '2987803a4aad4f309b3c374e2b0931ad',
       },
     });
