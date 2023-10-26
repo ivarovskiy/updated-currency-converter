@@ -6,7 +6,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   styleUrls: ['./input.component.scss'],
 })
 export class InputComponent {
-  @Input() value!: number | null;
+  @Input() disabled!: boolean;
+  @Input() value!: number;
   @Output() valueChange: EventEmitter<number> = new EventEmitter<number>();
 
   onInputChange(event: Event): void {

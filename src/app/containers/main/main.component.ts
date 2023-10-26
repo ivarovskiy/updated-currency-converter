@@ -1,16 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import {
   Observable,
-  Subject,
-  catchError,
   combineLatest,
   debounce,
   switchMap,
   timer,
-  defaultIfEmpty,
-  startWith,
-  map,
   tap,
+  BehaviorSubject,
 } from 'rxjs';
 import { Currency, CurrencyInputValue } from 'src/app/models/currency';
 import { ExchangeApiService } from 'src/app/services/exchange-api.service';
@@ -21,68 +17,57 @@ import { ExchangeApiService } from 'src/app/services/exchange-api.service';
   styleUrls: ['./main.component.scss'],
 })
 export class MainComponent implements OnInit {
-  currencyFrom!: any;
-  currencyTo!: any;
-  amountFrom = 0;
+  amountFrom = 1;
+  currencyFrom: Currency = { value: 'USD', label: 'USD', symbol: 'USD' };
+  amountTo$: Observable<number>;
+  currencyTo: Currency = { value: 'UAH', label: 'UAH', symbol: 'UAH' };
 
-  currencyAggregateFrom: Subject<CurrencyInputValue> =
-    new Subject<CurrencyInputValue>();
-  currencyAggregateTo: Subject<CurrencyInputValue> =
-    new Subject<CurrencyInputValue>();
+  currencyAggregateFrom = new BehaviorSubject<CurrencyInputValue>({
+    amount: this.amountFrom,
+    currency: this.currencyFrom,
+  });
+  currencyAggregateTo = new BehaviorSubject<CurrencyInputValue>({
+    amount: 0,
+    currency: this.currencyTo,
+  });
 
-  amountTo$: Observable<number> | null = new Observable<number>();
-  currencies$: Observable<Currency[]> = new Observable<Currency[]>();
+  currencies$: Observable<Currency[]>;
 
   constructor(private exchangeApi: ExchangeApiService) {
     this.currencies$ = this.exchangeApi.getCurrencies().pipe(
-      tap((currencies: Currency[]) => {
-        const keys = Object.keys(currencies);
-        const values = Object.values(currencies);
-
-        const firstKey = keys[0];
-        const firstValue = values[0];
-        const secondKey = keys[1];
-        const secondValue = values[1];
-
-        this.currencyFrom = { key: firstKey, value: firstValue };
-        this.currencyTo = { key: secondKey, value: secondValue };
+      tap(([from, to]) => {
+        this.currencyAggregateFrom.next({
+          amount: this.amountFrom,
+          currency: (this.currencyFrom = from),
+        });
+        this.currencyAggregateTo.next({
+          amount: 0,
+          currency: (this.currencyTo = to),
+        });
       })
     );
-
     this.amountTo$ = combineLatest([
       this.currencyAggregateFrom,
       this.currencyAggregateTo,
     ]).pipe(
       debounce(() => timer(400)),
-      switchMap(([currencyAggrFrom, currencyAggrTo]) => {
-        return this.exchangeApi.convert(
+      switchMap(([currencyAggrFrom, currencyAggrTo]) =>
+        this.exchangeApi.convert(
           currencyAggrFrom.amount,
           currencyAggrFrom.currency.value,
           currencyAggrTo.currency.value
-        );
-      }),
-      catchError(err => {
-        return new Observable<number>();
-      }),
-      startWith(0)
+        )
+      )
     );
   }
 
-  onCurrencyInputChangeFrom(value: CurrencyInputValue): void {
-    console.log('main onCurrencyInputChangeFrom', value);
-    this.currencyAggregateFrom.next(value);
-  }
-
-  onCurrencyInputChangeTo(value: CurrencyInputValue): void {
-    console.log('main onCurrencyInputChangeTo', value);
-    this.currencyAggregateTo.next(value);
-  }
-
   onButtonSwapClick(): void {
-    [this.currencyAggregateFrom, this.currencyAggregateTo] = [
-      this.currencyAggregateTo,
-      this.currencyAggregateFrom,
-    ];
+    const { currency: currencyFrom, amount: amountFrom } =
+      this.currencyAggregateFrom.value;
+    const { currency: currencyTo } = this.currencyAggregateTo.value;
+    this.amountFrom = amountFrom;
+    this.currencyTo = currencyFrom;
+    this.currencyFrom = currencyTo;
   }
 
   ngOnInit() {

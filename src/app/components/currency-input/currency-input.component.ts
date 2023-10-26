@@ -2,10 +2,18 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnChanges,
   OnDestroy,
   Output,
 } from '@angular/core';
-import { Subject, Subscription, combineLatest, map } from 'rxjs';
+import {
+  Subject,
+  Subscription,
+  combineLatest,
+  map,
+  BehaviorSubject,
+  distinctUntilChanged,
+} from 'rxjs';
 import { Currency, CurrencyInputValue } from 'src/app/models/currency';
 
 @Component({
@@ -13,15 +21,20 @@ import { Currency, CurrencyInputValue } from 'src/app/models/currency';
   templateUrl: './currency-input.component.html',
   styleUrls: ['./currency-input.component.scss'],
 })
-export class CurrencyInputComponent implements OnDestroy {
-  @Input() amount!: number | null;
+export class CurrencyInputComponent implements OnDestroy, OnChanges {
+  @Input() disabled!: boolean;
+  @Input() amount!: number;
   @Input() currencies!: Currency[];
   @Input() selectedCurrency!: Currency;
   @Output() handleChange: EventEmitter<CurrencyInputValue> =
     new EventEmitter<CurrencyInputValue>();
 
-  amountStream: Subject<number> = new Subject<number>();
-  currencyStream: Subject<Currency> = new Subject<Currency>();
+  amountStream: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  currencyStream: BehaviorSubject<Currency> = new BehaviorSubject<Currency>({
+    symbol: '',
+    value: '',
+    label: '',
+  });
 
   subscription: Subscription = new Subscription();
 
@@ -34,19 +47,13 @@ export class CurrencyInputComponent implements OnDestroy {
         }))
       )
       .subscribe(value => {
-        console.log('combine latest value: ', value);
         this.handleChange.emit(value);
       });
   }
 
-  onAmountChange(newAmount: number) {
-    console.log('on amount change: ', newAmount);
-    this.amountStream.next(newAmount);
-  }
-
-  onCurrencySelect(newCurrency: Currency) {
-    console.log('on currency change: ', newCurrency);
-    this.currencyStream.next(newCurrency);
+  ngOnChanges() {
+    this.amountStream.next(this.amount);
+    this.currencyStream.next(this.selectedCurrency);
   }
 
   ngOnDestroy(): void {

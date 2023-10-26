@@ -7,8 +7,17 @@ import { Component, EventEmitter, Output } from '@angular/core';
 })
 export class ButtonComponent {
   @Output() buttonClicked: EventEmitter<Event> = new EventEmitter<Event>();
+  isRotated = false;
 
   onButtonClicked() {
     this.buttonClicked.emit();
+  }
+
+  addRotateClass() {
+    this.isRotated = true;
+  }
+
+  removeRotateClass() {
+    this.isRotated = false;
   }
 }

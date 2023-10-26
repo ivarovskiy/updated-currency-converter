@@ -4,15 +4,16 @@
       [currencies]="currencies"
       [amount]="amountFrom"
       [selectedCurrency]="currencyFrom"
-      (handleChange)="onCurrencyInputChangeFrom($event)"></app-currency-input>
+      (handleChange)="currencyAggregateFrom.next($event)"></app-currency-input>
   </ng-container>
   <app-button (buttonClicked)="onButtonSwapClick()"></app-button>
   <ng-container *ngIf="currencies$ | async as currencies; else loadingData">
     <app-currency-input
       [currencies]="currencies"
-      [amount]="amountTo$ | async"
+      [disabled]="true"
+      [amount]="amountTo$ | asyncy"
       [selectedCurrency]="currencyTo"
-      (handleChange)="onCurrencyInputChangeTo($event)"></app-currency-input>
+      (handleChange)="currencyAggregateTo.next($event)"></app-currency-input>
   </ng-container>
 </div>
 

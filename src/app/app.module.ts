@@ -5,6 +5,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './services/auth-interceptor';
+
 //primeNg components
 
 import { KeyFilterModule } from 'primeng/keyfilter';
@@ -20,6 +23,8 @@ import { ButtonComponent } from './components/button/button.component';
 import { CurrencyInputComponent } from './components/currency-input/currency-input.component';
 import { HeaderComponent } from './containers/header/header.component';
 import { MainComponent } from './containers/main/main.component';
+
+import { AsyncyPipe } from '@tony-builder/asyncy';
 
 @NgModule({
   declarations: [
@@ -42,8 +47,15 @@ import { MainComponent } from './containers/main/main.component';
     ButtonModule,
     CardModule,
     InputTextModule,
+    AsyncyPipe,
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
+    },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

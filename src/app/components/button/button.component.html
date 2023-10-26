@@ -1,7 +1,13 @@
 <p-button
   styleClass="p-button-raised p-button-text p-button-warning xl"
-  (onClick)="onButtonClicked()">
+  (onClick)="onButtonClicked()"
+  (mouseenter)="addRotateClass()"
+  (mouseleave)="removeRotateClass()">
   <ng-template pTemplate="buttonicon">
-    <i class="fa-solid fa-rotate fa-spin fa-xl"></i>
+    <i
+      [ngClass]="{
+        'fa-spin': isRotated,
+        'fa-xl fa-solid fa-rotate': true
+      }"></i>
   </ng-template>
 </p-button>

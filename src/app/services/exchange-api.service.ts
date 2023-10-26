@@ -1,160 +1,51 @@
-import { Injectable } from '@angular/core';
-import { Observable, map, of } from 'rxjs';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Currency, CurrencyInputValue } from '../models/currency';
-import { throwError } from 'rxjs';
+import { Injectable, isDevMode } from '@angular/core';
+import { Observable, map, of, iif } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Currency } from '../models/currency';
 import { catchError } from 'rxjs/operators';
+import currencies from './currencies.json';
+import latest from './latest.json';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ExchangeApiService {
-  private apiKey = '2987803a4aad4f309b3c374e2b0931ad';
-  private baseUrl = 'https://openexchangerates.org/api';
-
   constructor(private http: HttpClient) {}
 
   getCurrenciesRates(): Observable<any> {
-    const params = new HttpParams().set('app_id', this.apiKey);
-    return this.http.get<any>(`${this.baseUrl}/latest.json`, {
-      params,
-    });
+    return iif(isDevMode, of(latest), this.http.get('/latest.jso'));
   }
 
   getCurrencies(): Observable<Currency[]> {
-    const params = new HttpParams().set('app_id', this.apiKey);
-    return this.http.get<any>(`${this.baseUrl}/currencies.json`, {
-      params,
-    });
+    return iif(
+      isDevMode,
+      of(currencies),
+      this.http.get(`/currencies.json`)
+    ).pipe(
+      map(obj =>
+        Object.entries(obj).map(([value, label]) => ({
+          label,
+          value,
+          symbol: value,
+        }))
+      )
+    );
   }
 
   convert(amount: number, from: string, to: string): Observable<number> {
     console.log('convert: ', amount, from, to);
+    return this.getCurrenciesRates().pipe(
+      catchError(error => of(`Bad Promise: ${error}`)),
+      map(({ rates }) => {
+        let convertedValue = 0;
+        if (rates && rates[from] && rates[to]) {
+          const fromRate = rates[from];
+          const toRate = rates[to];
 
-    const params = new HttpParams().set('app_id', this.apiKey);
-
-    return this.http
-      .get<any>(`${this.baseUrl}/latest.json`, {
-        params,
+          convertedValue = amount * (toRate / fromRate);
+        }
+        return +convertedValue.toFixed(2);
       })
-      .pipe(
-        catchError(error => of(`Bad Promise: ${error}`)),
-        map(response => {
-          const rates = response.rates;
-
-          if (rates && rates[from] && rates[to]) {
-            const fromRate = rates[from];
-            const toRate = rates[to];
-
-            const convertedValue = amount * (toRate / fromRate);
-
-            return +convertedValue.toFixed(2);
-          } else {
-            throw new Error('Currency rates not found');
-          }
-        })
-      );
-    // change to CurrencyInputValue
-  }
-
-  getConvertRates(
-    from: string,
-    to: string,
-    value: string,
-    flag: boolean
-  ): Observable<number> {
-    const params = new HttpParams().set('app_id', this.apiKey);
-    return this.http
-      .get<any>(`${this.baseUrl}/latest.json`, {
-        params,
-      })
-      .pipe(
-        map(response => {
-          const rates = response.rates;
-
-          if (rates && rates[from] && rates[to]) {
-            let fromRate;
-            let toRate;
-
-            if (flag === true) {
-              fromRate = rates[from];
-              toRate = rates[to];
-            } else {
-              fromRate = rates[to];
-              toRate = rates[from];
-            }
-            const convertedValue = parseFloat(value) * (toRate / fromRate);
-
-            return +convertedValue.toFixed(2);
-          } else {
-            throw new Error('Currency rates not found');
-          }
-        })
-      );
+    );
   }
 }
-
-// import { Injectable } from '@angular/core';
-// import { Observable, map } from 'rxjs';
-// import { HttpClient, HttpParams } from '@angular/common/http';
-// import { environment } from 'src/environment/environment.prod';
-
-// @Injectable({
-//   providedIn: 'root',
-// })
-// export class OpenExchangeRatesService {
-//   private apiKey = environment.apiKey;
-//   private baseUrl = 'https://openexchangerates.org/api';
-
-//   constructor(private http: HttpClient) {}
-
-//   getCurrencyRates(): Observable<any> {
-//     const params = new HttpParams().set('app_id', this.apiKey);
-//     return this.http.get<any>(`${this.baseUrl}/latest.json`, {
-//       params,
-//     });
-//   }
-
-//   getCurrencies(): Observable<any> {
-//     const params = new HttpParams().set('app_id', this.apiKey);
-//     return this.http.get<any>(`${this.baseUrl}/currencies.json`, {
-//       params,
-//     });
-//   }
-
-//   getConvertRates(
-//     from: string,
-//     to: string,
-//     value: string,
-//     flag: boolean
-//   ): Observable<number> {
-//     const params = new HttpParams().set('app_id', this.apiKey);
-//     return this.http
-//       .get<any>(`${this.baseUrl}/latest.json`, {
-//         params,
-//       })
-//       .pipe(
-//         map(response => {
-//           const rates = response.rates;
-
-//           if (rates && rates[from] && rates[to]) {
-//             let fromRate;
-//             let toRate;
-
-//             if (flag === true) {
-//               fromRate = rates[from];
-//               toRate = rates[to];
-//             } else {
-//               fromRate = rates[to];
-//               toRate = rates[from];
-//             }
-//             const convertedValue = parseFloat(value) * (toRate / fromRate);
-
-//             return +convertedValue.toFixed(2);
-//           } else {
-//             throw new Error('Currency rates not found');
-//           }
-//         })
-//       );
-//   }
-// }
