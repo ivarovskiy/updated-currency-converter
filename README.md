@@ -15,6 +15,7 @@ The following technologies were used in the development:
 - ### currency-flags
 - ### primeflex
 - ### primeicons
+- ### angular-cli-ghpages
 
 
 ### The API used is - openexchangerates
