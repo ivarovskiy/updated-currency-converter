@@ -4,6 +4,7 @@ import {
   Input,
   OnChanges,
   OnDestroy,
+  OnInit,
   Output,
 } from '@angular/core';
 import {
@@ -21,7 +22,7 @@ import { Currency, CurrencyInputValue } from 'src/app/models/currency';
   templateUrl: './currency-input.component.html',
   styleUrls: ['./currency-input.component.scss'],
 })
-export class CurrencyInputComponent implements OnDestroy, OnChanges {
+export class CurrencyInputComponent implements OnDestroy, OnInit {
   @Input() disabled!: boolean;
   @Input() amount!: number;
   @Input() currencies!: Currency[];
@@ -51,7 +52,7 @@ export class CurrencyInputComponent implements OnDestroy, OnChanges {
       });
   }
 
-  ngOnChanges() {
+  ngOnInit() {
     this.amountStream.next(this.amount);
     this.currencyStream.next(this.selectedCurrency);
   }

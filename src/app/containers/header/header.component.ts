@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ExchangeApiService } from 'src/app/services/exchange-api.service';
-import { interval, Subject } from 'rxjs';
-import { takeUntil, switchMap } from 'rxjs/operators';
+import { interval, Subscription, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-header',
@@ -9,7 +9,7 @@ import { takeUntil, switchMap } from 'rxjs/operators';
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+  subscription: Subscription = new Subscription();
 
   usd = 0;
   eur = 0;
@@ -18,32 +18,32 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(private exchangeApi: ExchangeApiService) {}
 
   ngOnInit() {
-    this.updateCurrencyRates();
+    this.updateCurrencyValues();
 
-    interval(60000)
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(() => this.exchangeApi.getCurrenciesRates())
-      )
-      .subscribe(data => {
-        console.log(data);
-        this.usd = +(data.rates['USD'] * data.rates['UAH']).toFixed(2);
-        this.eur = +(data.rates['EUR'] * data.rates['UAH']).toFixed(2);
-        this.date = new Date();
-      });
+    const intervalSubscription = interval(60000)
+      .pipe(switchMap(() => of(this.updateCurrencyValues())))
+      .subscribe();
+
+    this.subscription.add(intervalSubscription);
   }
 
-  updateCurrencyRates() {
-    this.exchangeApi.getCurrenciesRates().subscribe(data => {
-      console.log(data);
-      this.usd = +(data.rates['USD'] * data.rates['UAH']).toFixed(2);
-      this.eur = +(data.rates['EUR'] * data.rates['UAH']).toFixed(2);
-      this.date = new Date();
-    });
+  updateCurrencyValues(): void {
+    this.subscription.add(
+      this.exchangeApi
+        .convert(1, 'USD', 'UAH')
+        .subscribe(result => (this.usd = result))
+    );
+
+    this.subscription.add(
+      this.exchangeApi
+        .convert(1, 'EUR', 'UAH')
+        .subscribe(result => (this.eur = result))
+    );
+
+    this.date = new Date();
   }
 
   ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.subscription.unsubscribe();
   }
 }

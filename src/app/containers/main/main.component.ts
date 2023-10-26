@@ -7,6 +7,7 @@ import {
   timer,
   tap,
   BehaviorSubject,
+  of,
 } from 'rxjs';
 import { Currency, CurrencyInputValue } from 'src/app/models/currency';
 import { ExchangeApiService } from 'src/app/services/exchange-api.service';
@@ -60,17 +61,28 @@ export class MainComponent implements OnInit {
       )
     );
   }
-
   onButtonSwapClick(): void {
     const { currency: currencyFrom, amount: amountFrom } =
       this.currencyAggregateFrom.value;
-    const { currency: currencyTo } = this.currencyAggregateTo.value;
+    const { currency: currencyTo, amount: amountTo } =
+      this.currencyAggregateTo.value;
+
     this.amountFrom = amountFrom;
     this.currencyTo = currencyFrom;
     this.currencyFrom = currencyTo;
+
+    this.currencyAggregateFrom.next({
+      amount: amountFrom,
+      currency: currencyTo,
+    });
+
+    this.currencyAggregateTo.next({
+      amount: amountFrom,
+      currency: currencyFrom,
+    });
   }
 
   ngOnInit() {
-    console.log('ng on init');
+    console.log('have a nice trip');
   }
 }

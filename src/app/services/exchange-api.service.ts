@@ -20,7 +20,7 @@ export class ExchangeApiService {
     return iif(
       isDevMode,
       of(currencies),
-      this.http.get(`/currencies.json`)
+      this.http.get('/currencies.json')
     ).pipe(
       map(obj =>
         Object.entries(obj).map(([value, label]) => ({
@@ -33,7 +33,6 @@ export class ExchangeApiService {
   }
 
   convert(amount: number, from: string, to: string): Observable<number> {
-    console.log('convert: ', amount, from, to);
     return this.getCurrenciesRates().pipe(
       catchError(error => of(`Bad Promise: ${error}`)),
       map(({ rates }) => {
